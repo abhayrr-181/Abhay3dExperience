@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abhay3D Experiencing</title>
+    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2196F3;
+            --secondary: #1976D2;
+            --background: linear-gradient(135deg, #1e88e5 0%, #0d47a1 100%);
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --text: #333;
+            --text-light: #fff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: var(--background);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 1rem;
+            text-align: center;
+            color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: 600;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        .subtitle {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-top: 0.5rem;
+        }
+
+        .container {
+            display: flex;
+            flex: 1;
+            flex-direction: column;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+            padding: 1rem;
+        }
+
+        .viewer-container {
+            position: relative;
+            width: 100%;
+            height: 60vh;
+            min-height: 400px;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            margin-bottom: 1.5rem;
+        }
+
+        model-viewer {
+            width: 100%;
+            height: 100%;
+            --progress-bar-color: var(--primary);
+            --progress-mask: transparent;
+            --environment-color: #ffffff;
+            background-color: var(--environment-color);
+            transition: background-color 0.3s ease;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .control-panel {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .control-group {
+            margin-bottom: 1rem;
+        }
+
+        .control-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .control-group h3 {
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+            color: var(--secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+        }
+
+        button:hover {
+            background: var(--secondary);
+            transform: translateY(-1px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button.secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        button.secondary:hover {
+            background: #d0d0d0;
+        }
+
+        button.active {
+            background: var(--secondary);
+            box-shadow: 0 0 0 2px white, 0 0 0 4px var(--secondary);
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            height: 4px;
+            -webkit-appearance: none;
+            background: #ddd;
+            border-radius: 2px;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: var(--primary);
+            transition: width 0.1s linear;
+        }
+
+        .loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            z-index: 10;
+            transition: opacity 0.3s ease;
+        }
+
+        .loading.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .error {
+            color: #ff6b6b;
+            background: rgba(255, 0, 0, 0.1);
+            padding: 1rem;
+            border-radius: 4px;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .model-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        @media (max-width: 768px) {
+            .controls {
+                grid-template-columns: 1fr;
+            }
+            
+            .viewer-container {
+                height: 50vh;
+                min-height: 300px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+        }
+
+        /* Custom model-viewer controls */
+        .progress-mask {
+            background-color: transparent !important;
+        }
+
+        .progress-bar-inner {
+            background-color: var(--primary) !important;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Abhay3D Experiencing</h1>
+        <div class="subtitle">Interactive 3D model with animation controls</div>
+    </header>
+
+    <div class="container">
+        <div class="viewer-container">
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <div>Loading 3D model...</div>
+            </div>
+            <model-viewer
+                id="model-viewer"
+                src="abhay_model.glb"
+                camera-controls
+                auto-rotate
+                camera-orbit="0deg 75deg 2m"
+                camera-target="0m 0.5m 0m"
+                shadow-intensity="1"
+                environment-image="neutral"
+                exposure="1"
+                autoplay
+                ar
+                ar-modes="webxr scene-viewer quick-look"
+                ar-scale="auto"
+                ar-placement="floor"
+                shadow-softness="1"
+                shadow-intensity="0.8"
+                shadow-softness="0.6"
+                shadow-resolution="1024"
+                camera-controls
+                touch-action="pan-y"
+                auto-rotate-delay="0"
+                auto-rotate
+                interaction-prompt="none">
+                
+                <div class="progress-bar" slot="progress-bar">
+                    <div class="update-bar"></div>
+                </div>
+                
+                <button slot="ar-button" id="ar-button" class="ar-button">
+                    <span class="material-icons">view_in_ar</span> View in AR
+                </button>
+            </model-viewer>
+        </div>
+
+        <div class="controls">
+            <div class="control-panel">
+                <div class="control-group">
+                    <h3><span class="material-icons">animation</span> Animation</h3>
+                    <div class="btn-group">
+                        <button id="play-pause" class="active">
+                            <span class="material-icons" id="play-icon">pause</span>
+                            <span id="play-text">Pause</span>
+                        </button>
+                        <button id="restart-animation">
+                            <span class="material-icons">replay</span>
+                            Reset
+                        </button>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <h3><span class="material-icons">speed</span> Animation Speed</h3>
+                    <div class="slider-container">
+                        <span class="material-icons">slow_motion_video</span>
+                        <input type="range" id="speed-slider" min="0.1" max="2" step="0.1" value="1">
+                        <span class="material-icons">fast_forward</span>
+                    </div>
+                    <div style="text-align: center; font-size: 0.9rem; margin-top: 0.5rem;">
+                        Speed: <span id="speed-value">1.0</span>x
+                    </div>
+                </div>
+
+                <div class="progress-container">
+                    <div id="animation-progress" class="progress-bar"></div>
+                </div>
+            </div>
+
+            <div class="control-panel">
+                <div class="control-group">
+                    <h3><span class="material-icons">wb_sunny</span> Environment</h3>
+                    <div class="btn-group">
+                        <button class="env-btn active" data-env="neutral">Neutral</button>
+                        <button class="env-btn" data-env="forest">Forest</button>
+                        <button class="env-btn" data-env="apartment">Apartment</button>
+                        <button class="env-btn" data-env="studio">Studio</button>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <h3><span class="material-icons">tune</span> View</h3>
+                    <div class="btn-group">
+                        <button id="view-front" class="view-btn" data-view="0 90deg 2m">
+                            <span class="material-icons">north</span> Front
+                        </button>
+                        <button id="view-side" class="view-btn" data-view="90deg 75deg 2m">
+                            <span class="material-icons">east</span> Side
+                        </button>
+                        <button id="view-top" class="view-btn" data-view="0deg 0deg 2.5m">
+                            <span class="material-icons">zoom_out_map</span> Top
+                        </button>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <h3><span class="material-icons">layers</span> Display</h3>
+                    <div class="btn-group">
+                        <button id="toggle-wireframe" class="secondary">
+                            <span class="material-icons">grid_on</span> Wireframe
+                        </button>
+                        <button id="toggle-bounds" class="secondary">
+                            <span class="material-icons">border_outer</span> Bounds
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="model-stats">
+            <div>Polygons: 5,155 tris</div>
+            <div>Textures: 4K PBR</div>
+            <div>Animation: 5s loop</div>
+        </div>
+
+        <div class="error" id="error-message"></div>
+    </div>
+
+    <script type="module">
+        document.addEventListener('DOMContentLoaded', () => {
+            // Get model viewer element
+            const modelViewer = document.querySelector('model-viewer');
+            const loading = document.getElementById('loading');
+            const errorMessage = document.getElementById('error-message');
+            
+            // Animation controls
+            const playPauseBtn = document.getElementById('play-pause');
+            const playIcon = document.getElementById('play-icon');
+            const playText = document.getElementById('play-text');
+            const restartBtn = document.getElementById('restart-animation');
+            const speedSlider = document.getElementById('speed-slider');
+            const speedValue = document.getElementById('speed-value');
+            const progressBar = document.getElementById('animation-progress');
+            
+            // Environment controls
+            const envButtons = document.querySelectorAll('.env-btn');
+            
+            // Default environment will be set by loadEnvironment
+            
+            // View controls
+            const viewButtons = document.querySelectorAll('.view-btn');
+            
+            // Display controls
+            const toggleWireframe = document.getElementById('toggle-wireframe');
+            const toggleBounds = document.getElementById('toggle-bounds');
+            
+            // Animation state
+            let isPlaying = true;
+            let animationId = null;
+            
+            // Loading state
+            modelViewer.addEventListener('load', () => {
+                loading.classList.add('hidden');
+                updateAnimationProgress();
+                
+                // Set initial animation speed
+                modelViewer.timeScale = parseFloat(speedSlider.value);
+                
+                // Start animation loop
+                animate();
+            });
+            
+            // Error handling
+            modelViewer.addEventListener('error', (event) => {
+                console.error('Model loading error:', event.detail);
+                errorMessage.textContent = 'Error loading 3D model. Please try refreshing the page.';
+                errorMessage.style.display = 'block';
+                loading.classList.add('hidden');
+            });
+            
+            // Play/Pause animation
+            playPauseBtn.addEventListener('click', () => {
+                if (isPlaying) {
+                    modelViewer.pause();
+                    playIcon.textContent = 'play_arrow';
+                    playText.textContent = 'Play';
+                } else {
+                    modelViewer.play();
+                    playIcon.textContent = 'pause';
+                    playText.textContent = 'Pause';
+                }
+                isPlaying = !isPlaying;
+                playPauseBtn.classList.toggle('active', isPlaying);
+            });
+            
+            // Restart animation
+            restartBtn.addEventListener('click', () => {
+                modelViewer.currentTime = 0;
+                if (!isPlaying) {
+                    modelViewer.play();
+                    isPlaying = true;
+                    playIcon.textContent = 'pause';
+                    playText.textContent = 'Pause';
+                    playPauseBtn.classList.add('active');
+                }
+            });
+            
+            // Update animation speed
+            speedSlider.addEventListener('input', (e) => {
+                const speed = parseFloat(e.target.value);
+                modelViewer.timeScale = speed;
+                speedValue.textContent = speed.toFixed(1);
+            });
+            
+            // Simple environment presets
+            const environments = {
+                'neutral': 'neutral',
+                'forest': 'https://threejs.org/examples/textures/equirectangular/venice_sunset_1k.hdr',
+                'apartment': 'https://threejs.org/examples/textures/equirectangular/pisa.hdr',
+                'studio': 'https://threejs.org/examples/textures/equirectangular/royal_esplanade_1k.hdr'
+            };
+            
+            // Simple color environments as fallback
+            const colorEnvironments = {
+                'neutral': 'neutral',
+                'forest': '#2c4a36', // Dark green
+                'apartment': '#8b8b8b', // Light gray
+                'studio': '#1a1a2e' // Dark blue
+            };
+
+            // Function to set environment
+            function setEnvironment(env, btn) {
+                const originalText = btn.textContent;
+                
+                // Reset any active states
+                envButtons.forEach(b => b.classList.remove('active'));
+                
+                // Set the environment
+                if (env === 'neutral') {
+                    modelViewer.environmentImage = 'neutral';
+                    btn.classList.add('active');
+                } else {
+                    // Try to load the environment image
+                    modelViewer.environmentImage = environments[env];
+                    
+                    // Set a fallback solid color in case the image fails to load
+                    modelViewer.style.setProperty('--environment-color', colorEnvironments[env]);
+                    
+                    // Add active state to the button
+                    btn.classList.add('active');
+                }
+                
+                // Update UI
+                btn.textContent = originalText;
+            }
+            
+            // Function to handle environment button clicks
+            function handleEnvironmentClick(btn) {
+                const env = btn.dataset.env;
+                setEnvironment(env, btn);
+            }
+            }
+
+            // Set up environment button click handlers
+            envButtons.forEach(btn => {
+                btn.addEventListener('click', () => handleEnvironmentClick(btn));
+            });
+            
+            // Set initial environment
+            setEnvironment('neutral', document.querySelector('.env-btn[data-env="neutral"]'));
+            
+            // Update camera view
+            viewButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const orbit = btn.dataset.view;
+                    modelViewer.cameraOrbit = orbit;
+                    
+                    // Update active state
+                    viewButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                });
+            });
+            
+            // Toggle wireframe
+            toggleWireframe.addEventListener('click', () => {
+                modelViewer.wireframe = !modelViewer.wireframe;
+                toggleWireframe.classList.toggle('active');
+            });
+            
+            // Toggle bounds
+            toggleBounds.addEventListener('click', () => {
+                // Toggle bounds visibility by toggling a class on the model-viewer
+                modelViewer.shadowIntensity = modelViewer.shadowIntensity === 0 ? 0.8 : 0;
+                toggleBounds.classList.toggle('active');
+            });
+            
+            // Update animation progress
+            function updateAnimationProgress() {
+                if (modelViewer.duration) {
+                    const progress = (modelViewer.currentTime / modelViewer.duration) * 100;
+                    progressBar.style.width = `${progress}%`;
+                }
+            }
+            
+            // Animation loop
+            function animate() {
+                updateAnimationProgress();
+                animationId = requestAnimationFrame(animate);
+            }
+            
+            // Clean up on unmount
+            return () => {
+                if (animationId) {
+                    cancelAnimationFrame(animationId);
+                }
+            };
+        });
+    </script>
+</body>
+</html>
